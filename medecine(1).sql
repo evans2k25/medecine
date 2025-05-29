@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Hôte : 127.0.0.1
--- Généré le : jeu. 29 mai 2025 à 18:38
--- Version du serveur : 10.4.32-MariaDB
--- Version de PHP : 8.2.12
+-- Host: 127.0.0.1
+-- Generation Time: May 29, 2025 at 08:49 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de données : `medecine`
+-- Database: `medecine`
 --
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table `alertes`
+-- Table structure for table `alertes`
 --
 
 CREATE TABLE `alertes` (
@@ -39,7 +39,7 @@ CREATE TABLE `alertes` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `constantes`
+-- Table structure for table `constantes`
 --
 
 CREATE TABLE `constantes` (
@@ -58,7 +58,7 @@ CREATE TABLE `constantes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `constantes`
+-- Dumping data for table `constantes`
 --
 
 INSERT INTO `constantes` (`id`, `patient_id`, `patient_nom`, `patient_prenom`, `personnel_id`, `temperature`, `tension_arterielle`, `frequence_cardiaque`, `frequence_respiratoire`, `saturation`, `glycemie`, `date_prise`) VALUES
@@ -68,7 +68,7 @@ INSERT INTO `constantes` (`id`, `patient_id`, `patient_nom`, `patient_prenom`, `
 -- --------------------------------------------------------
 
 --
--- Structure de la table `consultations`
+-- Table structure for table `consultations`
 --
 
 CREATE TABLE `consultations` (
@@ -83,7 +83,7 @@ CREATE TABLE `consultations` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `dossiers_medicaux`
+-- Table structure for table `dossiers_medicaux`
 --
 
 CREATE TABLE `dossiers_medicaux` (
@@ -96,7 +96,7 @@ CREATE TABLE `dossiers_medicaux` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `etab_enreg`
+-- Table structure for table `etab_enreg`
 --
 
 CREATE TABLE `etab_enreg` (
@@ -111,7 +111,7 @@ CREATE TABLE `etab_enreg` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `etab_enreg`
+-- Dumping data for table `etab_enreg`
 --
 
 INSERT INTO `etab_enreg` (`id`, `nom`, `type`, `adresse`, `telephone`, `email`, `responsable`, `date_creation`) VALUES
@@ -120,7 +120,7 @@ INSERT INTO `etab_enreg` (`id`, `nom`, `type`, `adresse`, `telephone`, `email`, 
 -- --------------------------------------------------------
 
 --
--- Structure de la table `patients`
+-- Table structure for table `patients`
 --
 
 CREATE TABLE `patients` (
@@ -141,7 +141,7 @@ CREATE TABLE `patients` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `patients`
+-- Dumping data for table `patients`
 --
 
 INSERT INTO `patients` (`id`, `numero_dossier`, `etablissement_id`, `nom`, `prenom`, `date_naissance`, `sexe`, `poids`, `taille`, `adresse`, `telephone`, `email`, `groupe_sanguin`, `date_enregistrement`) VALUES
@@ -153,7 +153,7 @@ INSERT INTO `patients` (`id`, `numero_dossier`, `etablissement_id`, `nom`, `pren
 -- --------------------------------------------------------
 
 --
--- Structure de la table `personnel`
+-- Table structure for table `personnel`
 --
 
 CREATE TABLE `personnel` (
@@ -165,21 +165,22 @@ CREATE TABLE `personnel` (
   `email` varchar(100) DEFAULT NULL,
   `mdp_defaut` varchar(255) DEFAULT NULL,
   `date_embauche` date DEFAULT NULL,
-  `etablissement_id` int(11) DEFAULT NULL
+  `etablissement_id` int(11) DEFAULT NULL,
+  `actif` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `personnel`
+-- Dumping data for table `personnel`
 --
 
-INSERT INTO `personnel` (`id`, `nom`, `prenom`, `fonction`, `telephone`, `email`, `mdp_defaut`, `date_embauche`, `etablissement_id`) VALUES
-(1, 'kone', 'Ahmed', 'Secretaire', '01556412', 'Ahmed@mail.com', NULL, '2025-05-29', NULL),
-(2, 'Cha BI', 'Daniel', 'Secretaire', '010233654', 'chabidaniel@gmail.com', '12345678', '2025-05-23', 1);
+INSERT INTO `personnel` (`id`, `nom`, `prenom`, `fonction`, `telephone`, `email`, `mdp_defaut`, `date_embauche`, `etablissement_id`, `actif`) VALUES
+(1, 'kone', 'Ahmed', 'Secretaire', '01556412', 'Ahmed@mail.com', NULL, '2025-05-29', NULL, NULL),
+(2, 'Cha BI', 'Daniel', 'Secretaire', '010233654', 'chabidaniel@gmail.com', '$2y$10$6uqPY9Y/b4EGzpSDWFerJu/AW6Y0jMLgZL6ExOBSOGOTc/ALW7.au', '2025-05-23', 1, NULL);
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table `rapports`
+-- Table structure for table `rapports`
 --
 
 CREATE TABLE `rapports` (
@@ -193,7 +194,7 @@ CREATE TABLE `rapports` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `rendez_vous`
+-- Table structure for table `rendez_vous`
 --
 
 CREATE TABLE `rendez_vous` (
@@ -208,7 +209,7 @@ CREATE TABLE `rendez_vous` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `utilisateurs`
+-- Table structure for table `utilisateurs`
 --
 
 CREATE TABLE `utilisateurs` (
@@ -222,24 +223,24 @@ CREATE TABLE `utilisateurs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Déchargement des données de la table `utilisateurs`
+-- Dumping data for table `utilisateurs`
 --
 
 INSERT INTO `utilisateurs` (`id`, `nom`, `email`, `mot_de_passe`, `role`, `actif`, `date_creation`) VALUES
 (1, 'kouadou yaya', 'kyaya@mail.com', '$2y$10$6uqPY9Y/b4EGzpSDWFerJu/AW6Y0jMLgZL6ExOBSOGOTc/ALW7.au', 'medecin', 1, '2025-05-29 00:15:48');
 
 --
--- Index pour les tables déchargées
+-- Indexes for dumped tables
 --
 
 --
--- Index pour la table `alertes`
+-- Indexes for table `alertes`
 --
 ALTER TABLE `alertes`
   ADD PRIMARY KEY (`id`);
 
 --
--- Index pour la table `constantes`
+-- Indexes for table `constantes`
 --
 ALTER TABLE `constantes`
   ADD PRIMARY KEY (`id`),
@@ -247,167 +248,167 @@ ALTER TABLE `constantes`
   ADD KEY `personnel_id` (`personnel_id`);
 
 --
--- Index pour la table `consultations`
+-- Indexes for table `consultations`
 --
 ALTER TABLE `consultations`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_patient_id` (`patient_id`);
 
 --
--- Index pour la table `dossiers_medicaux`
+-- Indexes for table `dossiers_medicaux`
 --
 ALTER TABLE `dossiers_medicaux`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_dm_patient_id` (`patient_id`);
 
 --
--- Index pour la table `etab_enreg`
+-- Indexes for table `etab_enreg`
 --
 ALTER TABLE `etab_enreg`
   ADD PRIMARY KEY (`id`);
 
 --
--- Index pour la table `patients`
+-- Indexes for table `patients`
 --
 ALTER TABLE `patients`
   ADD PRIMARY KEY (`id`),
   ADD KEY `fk_etablissement` (`etablissement_id`);
 
 --
--- Index pour la table `personnel`
+-- Indexes for table `personnel`
 --
 ALTER TABLE `personnel`
   ADD PRIMARY KEY (`id`),
   ADD KEY `etablissement_id` (`etablissement_id`);
 
 --
--- Index pour la table `rapports`
+-- Indexes for table `rapports`
 --
 ALTER TABLE `rapports`
   ADD PRIMARY KEY (`id`),
   ADD KEY `utilisateur_id` (`utilisateur_id`);
 
 --
--- Index pour la table `rendez_vous`
+-- Indexes for table `rendez_vous`
 --
 ALTER TABLE `rendez_vous`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_rdv_patient_id` (`patient_id`);
 
 --
--- Index pour la table `utilisateurs`
+-- Indexes for table `utilisateurs`
 --
 ALTER TABLE `utilisateurs`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`);
 
 --
--- AUTO_INCREMENT pour les tables déchargées
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT pour la table `alertes`
+-- AUTO_INCREMENT for table `alertes`
 --
 ALTER TABLE `alertes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `constantes`
+-- AUTO_INCREMENT for table `constantes`
 --
 ALTER TABLE `constantes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT pour la table `consultations`
+-- AUTO_INCREMENT for table `consultations`
 --
 ALTER TABLE `consultations`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `dossiers_medicaux`
+-- AUTO_INCREMENT for table `dossiers_medicaux`
 --
 ALTER TABLE `dossiers_medicaux`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `etab_enreg`
+-- AUTO_INCREMENT for table `etab_enreg`
 --
 ALTER TABLE `etab_enreg`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT pour la table `patients`
+-- AUTO_INCREMENT for table `patients`
 --
 ALTER TABLE `patients`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT pour la table `personnel`
+-- AUTO_INCREMENT for table `personnel`
 --
 ALTER TABLE `personnel`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT pour la table `rapports`
+-- AUTO_INCREMENT for table `rapports`
 --
 ALTER TABLE `rapports`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `rendez_vous`
+-- AUTO_INCREMENT for table `rendez_vous`
 --
 ALTER TABLE `rendez_vous`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pour la table `utilisateurs`
+-- AUTO_INCREMENT for table `utilisateurs`
 --
 ALTER TABLE `utilisateurs`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- Contraintes pour les tables déchargées
+-- Constraints for dumped tables
 --
 
 --
--- Contraintes pour la table `constantes`
+-- Constraints for table `constantes`
 --
 ALTER TABLE `constantes`
   ADD CONSTRAINT `constantes_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `constantes_ibfk_2` FOREIGN KEY (`personnel_id`) REFERENCES `personnel` (`id`) ON DELETE SET NULL;
 
 --
--- Contraintes pour la table `consultations`
+-- Constraints for table `consultations`
 --
 ALTER TABLE `consultations`
   ADD CONSTRAINT `consultations_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE;
 
 --
--- Contraintes pour la table `dossiers_medicaux`
+-- Constraints for table `dossiers_medicaux`
 --
 ALTER TABLE `dossiers_medicaux`
   ADD CONSTRAINT `dossiers_medicaux_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE;
 
 --
--- Contraintes pour la table `patients`
+-- Constraints for table `patients`
 --
 ALTER TABLE `patients`
   ADD CONSTRAINT `fk_etablissement` FOREIGN KEY (`etablissement_id`) REFERENCES `etab_enreg` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `personnel`
+-- Constraints for table `personnel`
 --
 ALTER TABLE `personnel`
   ADD CONSTRAINT `personnel_ibfk_1` FOREIGN KEY (`etablissement_id`) REFERENCES `etab_enreg` (`id`);
 
 --
--- Contraintes pour la table `rapports`
+-- Constraints for table `rapports`
 --
 ALTER TABLE `rapports`
   ADD CONSTRAINT `rapports_ibfk_1` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateurs` (`id`) ON DELETE SET NULL;
 
 --
--- Contraintes pour la table `rendez_vous`
+-- Constraints for table `rendez_vous`
 --
 ALTER TABLE `rendez_vous`
   ADD CONSTRAINT `rendez_vous_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE;
