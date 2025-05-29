@@ -14,6 +14,23 @@ try {
     die("<div class='alert alert-danger'>Erreur de connexion à la base de données : " . htmlspecialchars($e->getMessage()) . "</div>");
 }
 
+// Fonction pour générer un numéro de dossier unique automatiquement
+function genererNumeroDossier(PDO $pdo) {
+    $anneeMois = date('Ym'); // ex : 202505
+    $stmt = $pdo->prepare("SELECT numero_dossier FROM patients WHERE numero_dossier LIKE ? ORDER BY numero_dossier DESC LIMIT 1");
+    $like = "D" . $anneeMois . "%";
+    $stmt->execute([$like]);
+    $last = $stmt->fetchColumn();
+
+    if ($last) {
+        $num = intval(substr($last, 7, 4));
+        $num++;
+    } else {
+        $num = 1;
+    }
+    return "D" . $anneeMois . str_pad($num, 4, "0", STR_PAD_LEFT);
+}
+
 // --- Traitement du formulaire (POST) ---
 $alert = '';
 // Récupérer la liste des établissements pour la sélection
@@ -25,9 +42,16 @@ try {
     $alert .= '<div class="alert alert-danger mt-3">Erreur lors de la récupération des établissements : ' . htmlspecialchars($e->getMessage()) . '</div>';
 }
 
+// Générer le numéro de dossier automatiquement si nouveau formulaire ou champ vide
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['numeroDossier'])) {
+    $numero_dossier_auto = genererNumeroDossier($pdo);
+} else {
+    $numero_dossier_auto = htmlspecialchars(trim($_POST['numeroDossier']));
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Sécuriser et récupérer les données
-    $numero_dossier   = htmlspecialchars(trim($_POST['numeroDossier'] ?? ''));
+    $numero_dossier   = $numero_dossier_auto; // Utilise le numéro généré, même si champ masqué côté client
     $nom              = htmlspecialchars(trim($_POST['patientNom'] ?? ''));
     $prenom           = htmlspecialchars(trim($_POST['patientPrenom'] ?? ''));
     $date_naissance   = $_POST['patientDateNaissance'] ?? '';
@@ -53,51 +77,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($poids !== null && ($poids < 0 || $poids > 500)) $errors[] = "Le poids doit être compris entre 0 et 500 kg.";
     if ($taille !== null && ($taille < 0 || $taille > 300)) $errors[] = "La taille doit être comprise entre 0 et 300 cm.";
 
+    // ------ Vérification existence patient ------
     if (empty($errors)) {
         try {
-            $stmt = $pdo->prepare("
-                INSERT INTO patients 
-                    (numero_dossier, nom, prenom, date_naissance, sexe, poids, taille, adresse, telephone, email, groupe_sanguin, etablissement_id)
-                VALUES 
-                    (:numero_dossier, :nom, :prenom, :date_naissance, :sexe, :poids, :taille, :adresse, :telephone, :email, :groupe_sanguin, :etablissement_id)
+            $checkStmt = $pdo->prepare("
+                SELECT id FROM patients 
+                WHERE numero_dossier = :numero_dossier 
+                  AND nom = :nom
+                  AND prenom = :prenom
+                  AND date_naissance = :date_naissance
+                  AND etablissement_id = :etablissement_id
+                LIMIT 1
             ");
-            $stmt->execute([
+            $checkStmt->execute([
                 ':numero_dossier'   => $numero_dossier,
                 ':nom'              => $nom,
                 ':prenom'           => $prenom,
                 ':date_naissance'   => $date_naissance,
-                ':sexe'             => $sexe,
-                ':poids'            => $poids,
-                ':taille'           => $taille,
-                ':adresse'          => $adresse,
-                ':telephone'        => $telephone,
-                ':email'            => $email,
-                ':groupe_sanguin'   => $groupe_sanguin ?: null,
                 ':etablissement_id' => $etablissement_id
             ]);
-            $alert = '<div class="alert alert-success mt-3">Patient enregistré avec succès !</div>';
+            if ($checkStmt->fetch()) {
+                $alert = '<div class="alert alert-warning mt-3">Ce patient existe déjà dans la base de données.</div>';
+            } else {
+                // Insertion
+                $stmt = $pdo->prepare("
+                    INSERT INTO patients 
+                        (numero_dossier, nom, prenom, date_naissance, sexe, poids, taille, adresse, telephone, email, groupe_sanguin, etablissement_id)
+                    VALUES 
+                        (:numero_dossier, :nom, :prenom, :date_naissance, :sexe, :poids, :taille, :adresse, :telephone, :email, :groupe_sanguin, :etablissement_id)
+                ");
+                $stmt->execute([
+                    ':numero_dossier'   => $numero_dossier,
+                    ':nom'              => $nom,
+                    ':prenom'           => $prenom,
+                    ':date_naissance'   => $date_naissance,
+                    ':sexe'             => $sexe,
+                    ':poids'            => $poids,
+                    ':taille'           => $taille,
+                    ':adresse'          => $adresse,
+                    ':telephone'        => $telephone,
+                    ':email'            => $email,
+                    ':groupe_sanguin'   => $groupe_sanguin ?: null,
+                    ':etablissement_id' => $etablissement_id
+                ]);
+                $alert = '<div class="alert alert-success mt-3">Patient enregistré avec succès !</div>';
+                // Après succès, régénère un numéro pour l'ajout suivant
+                $numero_dossier_auto = genererNumeroDossier($pdo);
+            }
         } catch (PDOException $e) {
             $alert = '<div class="alert alert-danger mt-3">Erreur lors de l\'enregistrement : ' . htmlspecialchars($e->getMessage()) . '</div>';
         }
     } else {
         $alert = '<div class="alert alert-warning mt-3"><ul><li>' . implode('</li><li>', $errors) . '</li></ul></div>';
     }
-
-    // ...
-if (empty($errors)) {
-    try {
-        $numero_dossier = genererNumeroDossier($pdo);
-        $stmt = $pdo->prepare("
-            INSERT INTO patients 
-                (numero_dossier, nom, prenom, date_naissance, sexe, poids, taille, adresse, telephone, email, groupe_sanguin, etablissement_id, date_enregistrement)
-            VALUES 
-                (:numero_dossier, :nom, :prenom, :date_naissance, :sexe, :poids, :taille, :adresse, :telephone, :email, :groupe_sanguin, :etablissement_id, NOW())
-        ");
-        $stmt->execute([
-            ':numero_dossier'   => $numero_dossier,
-            // ... autres champs comme avant
-        ]);
-        // ...
 }
 ?>
 <!DOCTYPE html>
@@ -108,8 +140,77 @@ if (empty($errors)) {
     <title>Enregistrement d’un Patient</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+    :root {
+      --main-bg: #f9fafc;
+      --sidebar-bg: #212a3e;
+      --widget-bg: #ffffff;
+      --widget-shadow: rgba(44,62,80,0.07);
+      --blue: #1877f2;
+      --green: #28c76f;
+      --orange: #ff9f43;
+      --red: #ea5455;
+      --gray: #6c757d;
+      --text-dark: #212529;
+      --text-light: #fff;
+      --status-completed: #28c76f;
+      --status-pending: #ff9f43;
+    }
+    body {
+      background: var(--main-bg);
+    }
+    .container {
+      background: var(--widget-bg);
+      border-radius: 18px;
+      box-shadow: 0 2px 12px 0 var(--widget-shadow);
+      padding: 38px 36px 32px 36px;
+      margin-top: 30px;
+      margin-bottom: 30px;
+    }
+    h2#add-patient-title {
+      color: var(--blue);
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .form-label {
+      color: var(--sidebar-bg);
+      font-weight: 500;
+    }
+    .form-control, .form-select, .custom-select {
+      border-radius: 8px;
+      border-color: var(--sidebar-bg);
+      background: #f9fafc;
+      color: var(--text-dark);
+    }
+    .form-control:focus, .form-select:focus, .custom-select:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 0.15rem var(--blue, #1877f2, 0.09);
+    }
+    .btn-success {
+      background: var(--green) !important;
+      border-color: var(--green) !important;
+      color: #fff !important;
+    }
+    .btn-success:hover {
+      background: #1eac5b !important;
+      border-color: #1eac5b !important;
+    }
+    .alert-success { background: var(--green); color: #fff; border: none; }
+    .alert-danger { background: var(--red); color: #fff; border: none; }
+    .alert-warning { background: var(--orange); color: #fff; border: none; }
+    .invalid-feedback { color: var(--red); }
+    .was-validated .form-control:invalid, .was-validated .custom-select:invalid {
+      background-image: none;
+      border-color: var(--red);
+      box-shadow: 0 0 0 0.15rem var(--red, #ea5455, 0.09);
+    }
+    .was-validated .form-control:valid, .was-validated .custom-select:valid {
+      border-color: var(--green);
+      box-shadow: 0 0 0 0.15rem var(--green, #28c76f, 0.09);
+    }
+    </style>
 </head>
-<body class="bg-light">
+<body>
 <div class="container py-4">
     <h2 id="add-patient-title" class="mb-4">Enregistrement d’un Patient</h2>
     <?php if (!empty($alert)) echo $alert; ?>
@@ -117,7 +218,7 @@ if (empty($errors)) {
         <div class="row">
             <div class="mb-3 col-md-4">
                 <label for="numeroDossier" class="form-label">N° dossier <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="numeroDossier" name="numeroDossier" required placeholder="Ex: D123456" value="<?php echo isset($_POST['numeroDossier']) ? htmlspecialchars($_POST['numeroDossier']) : ''; ?>">
+                <input type="text" class="form-control" id="numeroDossier" name="numeroDossier" required readonly value="<?php echo htmlspecialchars($numero_dossier_auto); ?>">
                 <div class="invalid-feedback">Veuillez entrer le numéro de dossier du patient.</div>
             </div>
             <div class="mb-3 col-md-4">
