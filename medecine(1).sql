@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : jeu. 29 mai 2025 à 16:28
+-- Généré le : jeu. 29 mai 2025 à 18:38
 -- Version du serveur : 10.4.32-MariaDB
 -- Version de PHP : 8.2.12
 
@@ -35,6 +35,35 @@ CREATE TABLE `alertes` (
   `date_alerte` datetime DEFAULT current_timestamp(),
   `statut` enum('non lu','lu') DEFAULT 'non lu'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `constantes`
+--
+
+CREATE TABLE `constantes` (
+  `id` int(11) NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `patient_nom` varchar(100) NOT NULL,
+  `patient_prenom` varchar(100) DEFAULT NULL,
+  `personnel_id` int(11) DEFAULT NULL,
+  `temperature` decimal(4,1) NOT NULL,
+  `tension_arterielle` varchar(10) NOT NULL,
+  `frequence_cardiaque` int(11) NOT NULL,
+  `frequence_respiratoire` int(11) NOT NULL,
+  `saturation` int(11) NOT NULL,
+  `glycemie` decimal(3,2) NOT NULL,
+  `date_prise` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `constantes`
+--
+
+INSERT INTO `constantes` (`id`, `patient_id`, `patient_nom`, `patient_prenom`, `personnel_id`, `temperature`, `tension_arterielle`, `frequence_cardiaque`, `frequence_respiratoire`, `saturation`, `glycemie`, `date_prise`) VALUES
+(1, 1, 'goly jean francois eric tresor', NULL, 2, 37.0, '120/80', 82, 18, 97, 1.05, '2025-05-29 16:02:37'),
+(2, 2, 'goly', 'jean francois', 2, 38.0, '130/80', 82, 18, 97, 1.05, '2025-05-29 16:04:50');
 
 -- --------------------------------------------------------
 
@@ -117,7 +146,9 @@ CREATE TABLE `patients` (
 
 INSERT INTO `patients` (`id`, `numero_dossier`, `etablissement_id`, `nom`, `prenom`, `date_naissance`, `sexe`, `poids`, `taille`, `adresse`, `telephone`, `email`, `groupe_sanguin`, `date_enregistrement`) VALUES
 (1, NULL, NULL, 'goly jean francois eric tresor', NULL, '2002-07-22', 'Homme', 82.00, 138.00, 'Rue H11', '0769393192', 'jean@mail.com', 'O-', '2025-05-28 23:47:07'),
-(2, NULL, NULL, 'goly', 'jean francois', '2025-05-25', 'Homme', 80.00, 183.00, 'Rue H11', '0545226898', 'goly@mail.com', 'O-', '2025-05-29 02:03:33');
+(2, NULL, NULL, 'goly', 'jean francois', '2025-05-25', 'Homme', 80.00, 183.00, 'Rue H11', '0545226898', 'goly@mail.com', 'O-', '2025-05-29 02:03:33'),
+(3, 'D2025050001', 1, 'Goly', 'Aya Yasmine Angeline', '2007-01-12', 'Femme', 75.00, 169.00, 'Rue H11', '0585805329', 'yasmin@mail.com', 'O-', '2025-05-29 16:18:14'),
+(4, 'D2025050002', 1, 'Goly', 'Christ ebenezer', '2012-08-04', 'Homme', 30.00, 159.00, 'Rue H11', '0545006565', 'christ@mail.com', 'O-', '2025-05-29 16:34:32');
 
 -- --------------------------------------------------------
 
@@ -208,6 +239,14 @@ ALTER TABLE `alertes`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Index pour la table `constantes`
+--
+ALTER TABLE `constantes`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `patient_id` (`patient_id`),
+  ADD KEY `personnel_id` (`personnel_id`);
+
+--
 -- Index pour la table `consultations`
 --
 ALTER TABLE `consultations`
@@ -273,6 +312,12 @@ ALTER TABLE `alertes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT pour la table `constantes`
+--
+ALTER TABLE `constantes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT pour la table `consultations`
 --
 ALTER TABLE `consultations`
@@ -294,7 +339,7 @@ ALTER TABLE `etab_enreg`
 -- AUTO_INCREMENT pour la table `patients`
 --
 ALTER TABLE `patients`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT pour la table `personnel`
@@ -323,6 +368,13 @@ ALTER TABLE `utilisateurs`
 --
 -- Contraintes pour les tables déchargées
 --
+
+--
+-- Contraintes pour la table `constantes`
+--
+ALTER TABLE `constantes`
+  ADD CONSTRAINT `constantes_ibfk_1` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `constantes_ibfk_2` FOREIGN KEY (`personnel_id`) REFERENCES `personnel` (`id`) ON DELETE SET NULL;
 
 --
 -- Contraintes pour la table `consultations`
