@@ -115,7 +115,12 @@ CREATE TABLE `etab_enreg` (
 --
 
 INSERT INTO `etab_enreg` (`id`, `nom`, `type`, `adresse`, `telephone`, `email`, `responsable`, `date_creation`) VALUES
-(1, 'hopital general de Koumassi', 'Hôpital', 'Abidjan,koumassi', '22566652', 'hopital@mail.com', 'Dr Tra bi', '2025-05-29 00:47:06');
+(1, 'hopital general de Koumassi', 'Hôpital', 'Abidjan,koumassi', '22566652', 'hopital@mail.com', 'Dr Tra bi', '2025-05-29 00:47:06'),
+(2, 'Hôpital Général de Koumassi', 'Public', 'Koumassi quartier Mairie', '27 21 00 00 01', NULL, 'Dr Kouadio Jean', NOW()),
+(3, 'CSU COM Divo', 'Public', 'Koumassi Divo', '27 21 00 00 02', NULL, 'Dr Koné Awa', NOW()),
+(4, 'Clinique RIMCA', 'Privé', 'Koumassi Remblais', '27 21 00 00 03', 'contact@rimca.ci', 'Dr N’Guessan Alain', NOW()),
+(5, 'Centre Médical Social El-Kabod', 'Privé', 'Koumassi Remblais', '27 21 00 00 04', 'elkabod@cms.ci', 'Dr Ouattara Mariam', NOW()),
+(6, 'Centre Médical La Sagesse', 'Privé', 'Koumassi Sicogi', '27 21 00 00 05', 'lasagesse@cms.ci', 'Dr Bamba Fatou', NOW());
 
 -- --------------------------------------------------------
 
@@ -156,19 +161,19 @@ INSERT INTO `patients` (`id`, `numero_dossier`, `etablissement_id`, `nom`, `pren
 -- Table structure for table `personnel`
 --
 
-CREATE TABLE `personnel` (
-  `id` int(11) NOT NULL,
-  `nom` varchar(100) NOT NULL,
-  `prenom` varchar(100) NOT NULL,
-  `fonction` varchar(100) NOT NULL,
-  `telephone` varchar(30) DEFAULT NULL,
-  `email` varchar(100) DEFAULT NULL,
-  `mdp_defaut` varchar(255) DEFAULT NULL,
-  `date_embauche` date DEFAULT NULL,
-  `etablissement_id` int(11) DEFAULT NULL,
-  `actif` text DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
+CREATE TABLE personnel (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nom VARCHAR(100) NOT NULL,
+  prenom VARCHAR(100) NOT NULL,
+  fonction VARCHAR(100) NOT NULL,
+  telephone VARCHAR(30),
+  email VARCHAR(100),
+  mdp_defaut VARCHAR(255),
+  date_embauche DATE,
+  etablissement_id INT NOT NULL, -- rendre NOT NULL pour forcer le lien obligatoire
+  actif TEXT,
+  FOREIGN KEY (etablissement_id) REFERENCES etab_enreg(id)
+);
 --
 -- Dumping data for table `personnel`
 --
@@ -334,7 +339,7 @@ ALTER TABLE `dossiers_medicaux`
 -- AUTO_INCREMENT for table `etab_enreg`
 --
 ALTER TABLE `etab_enreg`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `patients`

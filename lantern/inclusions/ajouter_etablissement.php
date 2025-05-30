@@ -1,5 +1,7 @@
 <?php
-session_start();
+require_once 'sessions/session_userloged.php';
+require_once 'database/db.php';
+
 
 // Vérifier si l'utilisateur est connecté (optionnel, à adapter selon votre application)
 if (!isset($_SESSION['user_id'])) {

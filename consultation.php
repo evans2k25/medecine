@@ -89,7 +89,7 @@ if (isset($_GET['q']) && !empty(trim($_GET['q']))) {
                         <td><?php echo htmlspecialchars($patient['sexe']); ?></td>
                         <td><?php echo htmlspecialchars($patient['telephone']); ?></td>
                         <td>
-                            <a href="fiche_patient.php?id=<?php echo $patient['id']; ?>" class="btn btn-primary btn-sm">Consulter</a>
+                            <a href="lantern/inclusions/fiche_patient.php?id=<?php echo $patient['id']; ?>" class="btn btn-primary btn-sm">Consulter</a>
                             <!-- Ajoutez ici d'autres actions possibles -->
                         </td>
                     </tr>

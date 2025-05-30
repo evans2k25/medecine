@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+
 // Vérifier si le personnel est connecté
 if (!isset($_SESSION['personnel_id'])) {
     header('Location: login_personnel.php');
