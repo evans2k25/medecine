@@ -1,12 +1,6 @@
 <?php
-require_once '../../sessions/session_userunloged_admin.php';
-require_once '../../database/db.php';
-
-// Vérifier si l'utilisateur est connecté
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit();
-}
+require_once '../sessions/session_userunloged_admin.php';
+require_once '../database/db.php';
 
 // Récupérer l'établissement de l'utilisateur connecté
 $etablissement_id = $_SESSION['etablissement_id'] ?? null;
@@ -60,13 +54,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <head>
     <meta charset="UTF-8">
-    <title>Ajouter un membre du personnel</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion de Dossiers Médicaux - Admin</title>
+    <?php require_once 'inclusions/head.php'; ?>
 </head>
 
-<body class="bg-light">
-    <div class="container py-4" style="max-width:600px;">
+<body>
+    <div class="dashboard-container">
+        <?php require_once 'inclusions/header.php'; ?>
+
+        <div class="overlay"></div>
+
+        <div class="dashboard-body">
+            <aside class="sidebar">
+                <?php require_once 'inclusions/sidebar.php'; ?>
+            </aside>
+
+            <main class="main-content">
+                <!-- Affichage du nom de l'établissement courant -->
+                <?php if ($etablissement_nom): ?>
+                    <div class="alert alert-info mb-4">Établissement courant : <strong><?= htmlspecialchars($etablissement_nom) ?></strong></div>
+                <?php endif; ?>
+
+                <!-- Affichage des infos de l'utilisateur connecté -->
+                <?php if ($user_infos): ?>
+                    <div class="card mb-4" style="max-width:500px; margin-left:auto; margin-right:0;">
+                        <div class="card-header bg-primary text-white">
+                            <i class="fas fa-user-circle"></i> Informations de l'utilisateur connecté
+                            <button type="button" class="btn btn-link text-white" data-bs-toggle="modal" data-bs-target="#userProfileModal">
+                                Voir le profil
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0">
+                                <li><strong>Nom :</strong> <?= htmlspecialchars($user_infos['nom'] ?? '') ?></li>
+                                <?php if (!empty($user_infos['email'])): ?>
+                                    <li><strong>Email :</strong> <?= htmlspecialchars($user_infos['email']) ?></li>
+                                <?php endif; ?>
+                                <?php if (!empty($user_infos['role'])): ?>
+                                    <li><strong>Rôle :</strong> <?= htmlspecialchars($user_infos['role']) ?></li>
+                                <?php endif; ?>
+                                <?php if (!empty($user_infos['docteur_hopital'])): ?>
+                                    <li><strong>Spécialité :</strong> <?= htmlspecialchars($user_infos['docteur_hopital']) ?></li>
+                                <?php endif; ?>
+                                <?php if (!empty($user_infos['etablissement_id'])): ?>
+                                    <li><strong>ID Établissement :</strong> <?= htmlspecialchars($user_infos['etablissement_id']) ?></li>
+                                <?php endif; ?>
+                                <?php if (isset($user_infos['actif'])): ?>
+                                    <li><strong>Statut :</strong> <?= $user_infos['actif'] ? '<span class="badge bg-success">Actif</span>' : '<span class="badge bg-danger">Inactif</span>' ?></li>
+                                <?php endif; ?>
+                            </ul>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            <div class="card">
+                <div class="card-body">
         <h2 class="mb-4">Ajouter un membre du personnel</h2>
         <?php if ($alert) echo $alert; ?>
         <form method="POST" class="needs-validation" novalidate>
@@ -129,27 +171,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit" class="btn btn-success mt-3">Ajouter</button>
             <a href="Modifier_personnel.php" class="btn btn-danger mt-3">Retour</a>
         </form>
+                </div>
+            </div>
+
+                <!-- ... autres sections inchangées ... -->
+
+            </main>
+        </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Validation Bootstrap
-        (function() {
-            'use strict';
-            window.addEventListener('load', function() {
-                var forms = document.getElementsByClassName('needs-validation');
-                Array.prototype.forEach.call(forms, function(form) {
-                    form.addEventListener('submit', function(event) {
-                        if (!form.checkValidity()) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        }
-                        form.classList.add('was-validated');
-                    }, false);
-                });
-            }, false);
-        })();
-    </script>
+
+    <!-- Modals -->
+    <?php require_once 'inclusions/modal.php'; ?>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- ... scripts JS ... -->
 </body>
 
 </html>

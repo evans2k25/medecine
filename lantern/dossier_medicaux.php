@@ -1,6 +1,6 @@
 <?php
-require_once '../../sessions/session_userunloged_admin.php';
-require_once '../../database/db.php';
+require_once '../sessions/session_userunloged_admin.php';
+require_once '../database/db.php';
 
 // Récupération de la liste des patients
 try {

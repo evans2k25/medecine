@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once '../sessions/session_userunloged_admin.php';
+require_once '../database/db.php';
 
 // Vérifier si le personnel est connecté
 if (!isset($_SESSION['personnel_id'])) {

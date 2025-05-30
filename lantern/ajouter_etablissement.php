@@ -1,13 +1,9 @@
 <?php
-require_once 'sessions/session_userloged.php';
-require_once 'database/db.php';
+require_once '../sessions/session_userunloged_admin.php';
+require_once '../database/db.php';
 
 
-// Vérifier si l'utilisateur est connecté (optionnel, à adapter selon votre application)
-if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit();
-}
+
 
 // Connexion à la base de données
 $host = 'localhost';
