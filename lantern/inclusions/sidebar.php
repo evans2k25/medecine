@@ -1,5 +1,6 @@
 <?php
 $current = basename($_SERVER['PHP_SELF']);
+
 ?>
 <div class="sidebar-header">
     <h2>Gestion Médicale</h2>
@@ -13,13 +14,13 @@ $current = basename($_SERVER['PHP_SELF']);
             </a>
         </li>
         <li>
-            <a href="patients.php" class="nav-link <?= $current == 'patients.php' ? 'active' : '' ?>">
-                <i class="fas fa-users"></i> Patients
+            <a href="inclusions/Modifier_personnel.php" class="nav-link <?= $current == 'Modifier_personnel.php' ? 'active' : '' ?>">
+                <i class="fas fa-users"></i> Mon personnel
             </a>
         </li>
         <li>
-            <a href="appointments.php" class="nav-link <?= $current == 'appointments.php' ? 'active' : '' ?>">
-                <i class="fas fa-calendar-alt"></i> Rendez-vous
+            <a href="inclusions/liste_patient.php" class="nav-link <?= $current == 'liste_patient.php' ? 'active' : '' ?>">
+                <i class="fas fa-calendar-alt"></i> Patients
             </a>
         </li>
         <li>
@@ -28,7 +29,7 @@ $current = basename($_SERVER['PHP_SELF']);
             </a>
         </li>
         <li>
-            <a href="records.php" class="nav-link <?= $current == 'records.php' ? 'active' : '' ?>">
+            <a href="inclusions/dossier_medicaux.php" class="nav-link <?= $current == 'dossier_medicaux.php' ? 'active' : '' ?>">
                 <i class="fas fa-file-medical"></i> Dossiers Médicaux
             </a>
         </li>

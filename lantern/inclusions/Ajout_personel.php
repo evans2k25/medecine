@@ -1,5 +1,7 @@
 <?php
-session_start();
+require_once '../../sessions/session_userunloged_admin.php';
+require_once '../../database/db.php';
+
 
 // Vérifier si l'utilisateur est connecté (optionnel, à adapter selon votre application)
 if (!isset($_SESSION['user_id'])) {
@@ -7,11 +9,6 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Connexion à la base de données
-$host = 'localhost';
-$dbname = 'medecine';
-$user = 'root'; // À adapter selon votre config
-$pass = '';     // À adapter selon votre config
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass, [
@@ -133,6 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
         <button type="submit" class="btn btn-success mt-3">Ajouter</button>
+        <a href="Modifier_personnel.php" class="btn btn-danger mt-3">Retour</a>
     </form>
 </div>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
