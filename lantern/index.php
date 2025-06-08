@@ -40,7 +40,7 @@ if ($user_id) {
 
 <body>
     <div class="dashboard-container">
-        <?php require_once 'inclusions/header.php'; ?>
+        <?php require_once 'inclusions/header.php';   ?>
 
         <div class="overlay"></div>
 
@@ -56,36 +56,7 @@ if ($user_id) {
                 <?php endif; ?>
 
                 <!-- Affichage des infos de l'utilisateur connecté -->
-                <?php if ($user_infos): ?>
-                    <div class="card mb-4" style="max-width:500px; margin-left:auto; margin-right:0;">
-                        <div class="card-header bg-primary text-white">
-                            <i class="fas fa-user-circle"></i> Informations de l'utilisateur connecté
-                            <button type="button" class="btn btn-link text-white" data-bs-toggle="modal" data-bs-target="#userProfileModal">
-                                Voir le profil
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-unstyled mb-0">
-                                <li><strong>Nom :</strong> <?= htmlspecialchars($user_infos['nom'] ?? '') ?></li>
-                                <?php if (!empty($user_infos['email'])): ?>
-                                    <li><strong>Email :</strong> <?= htmlspecialchars($user_infos['email']) ?></li>
-                                <?php endif; ?>
-                                <?php if (!empty($user_infos['role'])): ?>
-                                    <li><strong>Rôle :</strong> <?= htmlspecialchars($user_infos['role']) ?></li>
-                                <?php endif; ?>
-                                <?php if (!empty($user_infos['docteur_hopital'])): ?>
-                                    <li><strong>Spécialité :</strong> <?= htmlspecialchars($user_infos['docteur_hopital']) ?></li>
-                                <?php endif; ?>
-                                <?php if (!empty($user_infos['etablissement_id'])): ?>
-                                    <li><strong>ID Établissement :</strong> <?= htmlspecialchars($user_infos['etablissement_id']) ?></li>
-                                <?php endif; ?>
-                                <?php if (isset($user_infos['actif'])): ?>
-                                    <li><strong>Statut :</strong> <?= $user_infos['actif'] ? '<span class="badge bg-success">Actif</span>' : '<span class="badge bg-danger">Inactif</span>' ?></li>
-                                <?php endif; ?>
-                            </ul>
-                        </div>
-                    </div>
-                <?php endif; ?>
+                
 
                 <section id="dashboard" class="content-section active">
                     <h2>Tableau de Bord</h2>

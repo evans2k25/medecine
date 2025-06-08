@@ -4,6 +4,15 @@ require_once '../database/db.php';
 
 // Récupérer l'établissement de l'utilisateur connecté
 $etablissement_id = $_SESSION['etablissement_id'] ?? null;
+$etablissement_nom = '';
+if ($etablissement_id) {
+    $stmt = $pdo->prepare("SELECT nom FROM etab_enreg WHERE id = :id");
+    $stmt->execute([':id' => $etablissement_id]);
+    $row = $stmt->fetch();
+    if ($row) {
+        $etablissement_nom = $row['nom'];
+    }
+}
 
 $alert = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -57,6 +66,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion de Dossiers Médicaux - Admin</title>
     <?php require_once 'inclusions/head.php'; ?>
+    <style>
+        .centered-form-container {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .centered-form-card {
+            width: 100%;
+            max-width: 650px;
+            margin: 0 auto;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 0.5px 1.5px rgba(0,0,0,0.03);
+            border-radius: 18px;
+            background: #fff;
+        }
+        @media (max-width: 700px) {
+            .centered-form-card {
+                padding: 0 8px;
+                max-width: 100%;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -73,108 +104,79 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <main class="main-content">
                 <!-- Affichage du nom de l'établissement courant -->
                 <?php if ($etablissement_nom): ?>
-                    <div class="alert alert-info mb-4">Établissement courant : <strong><?= htmlspecialchars($etablissement_nom) ?></strong></div>
+                    <div class="alert alert-info mb-4 text-center">Établissement courant : <strong><?= htmlspecialchars($etablissement_nom) ?></strong></div>
                 <?php endif; ?>
 
-                <!-- Affichage des infos de l'utilisateur connecté -->
-                <?php if ($user_infos): ?>
-                    <div class="card mb-4" style="max-width:500px; margin-left:auto; margin-right:0;">
-                        <div class="card-header bg-primary text-white">
-                            <i class="fas fa-user-circle"></i> Informations de l'utilisateur connecté
-                            <button type="button" class="btn btn-link text-white" data-bs-toggle="modal" data-bs-target="#userProfileModal">
-                                Voir le profil
-                            </button>
-                        </div>
+                <div class="centered-form-container">
+                    <div class="card centered-form-card">
                         <div class="card-body">
-                            <ul class="list-unstyled mb-0">
-                                <li><strong>Nom :</strong> <?= htmlspecialchars($user_infos['nom'] ?? '') ?></li>
-                                <?php if (!empty($user_infos['email'])): ?>
-                                    <li><strong>Email :</strong> <?= htmlspecialchars($user_infos['email']) ?></li>
-                                <?php endif; ?>
-                                <?php if (!empty($user_infos['role'])): ?>
-                                    <li><strong>Rôle :</strong> <?= htmlspecialchars($user_infos['role']) ?></li>
-                                <?php endif; ?>
-                                <?php if (!empty($user_infos['docteur_hopital'])): ?>
-                                    <li><strong>Spécialité :</strong> <?= htmlspecialchars($user_infos['docteur_hopital']) ?></li>
-                                <?php endif; ?>
-                                <?php if (!empty($user_infos['etablissement_id'])): ?>
-                                    <li><strong>ID Établissement :</strong> <?= htmlspecialchars($user_infos['etablissement_id']) ?></li>
-                                <?php endif; ?>
-                                <?php if (isset($user_infos['actif'])): ?>
-                                    <li><strong>Statut :</strong> <?= $user_infos['actif'] ? '<span class="badge bg-success">Actif</span>' : '<span class="badge bg-danger">Inactif</span>' ?></li>
-                                <?php endif; ?>
-                            </ul>
+                            <h2 class="mb-4 text-center">Ajouter un membre du personnel</h2>
+                            <?php if ($alert) echo $alert; ?>
+                            <form method="POST" class="needs-validation" novalidate>
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label for="nom">Nom <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="nom" name="nom" required value="<?php echo isset($_POST['nom']) ? htmlspecialchars($_POST['nom']) : ''; ?>">
+                                        <div class="invalid-feedback">Veuillez saisir le nom.</div>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="prenom">Prénom <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="prenom" name="prenom" required value="<?php echo isset($_POST['prenom']) ? htmlspecialchars($_POST['prenom']) : ''; ?>">
+                                        <div class="invalid-feedback">Veuillez saisir le prénom.</div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="fonction">Fonction <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="fonction" name="fonction" required value="<?php echo isset($_POST['fonction']) ? htmlspecialchars($_POST['fonction']) : ''; ?>">
+                                    <div class="invalid-feedback">Veuillez saisir la fonction.</div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label for="telephone">Téléphone</label>
+                                        <input type="text" class="form-control" id="telephone" name="telephone" value="<?php echo isset($_POST['telephone']) ? htmlspecialchars($_POST['telephone']) : ''; ?>">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="email">Email</label>
+                                        <input type="email" class="form-control" id="email" name="email" value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="mdp_defaut">Mot de passe par défaut <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="mdp_defaut" name="mdp_defaut" required value="<?php echo isset($_POST['mdp_defaut']) ? htmlspecialchars($_POST['mdp_defaut']) : ''; ?>">
+                                    <div class="invalid-feedback">Veuillez saisir le mot de passe par défaut.</div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label for="date_embauche">Date d'embauche</label>
+                                        <input type="date" class="form-control" id="date_embauche" name="date_embauche" value="<?php echo isset($_POST['date_embauche']) ? htmlspecialchars($_POST['date_embauche']) : ''; ?>">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="etablissement_id">Établissement</label>
+                                        <?php
+                                        // Récupère le nom de l'établissement à partir de l'id
+                                        $etab_nom = '';
+                                        if (!empty($etablissement_id)) {
+                                            $stmtEtab = $pdo->prepare("SELECT nom FROM etab_enreg WHERE id = :id");
+                                            $stmtEtab->execute([':id' => $etablissement_id]);
+                                            $rowEtab = $stmtEtab->fetch();
+                                            if ($rowEtab) {
+                                                $etab_nom = $rowEtab['nom'];
+                                            }
+                                        }
+                                        ?>
+                                        <input type="text" class="form-control" id="etablissement_nom" name="etablissement_nom" value="<?php echo htmlspecialchars($etab_nom); ?>" readonly>
+                                        <input type="hidden" name="etablissement_id" value="<?php echo htmlspecialchars($etablissement_id); ?>">
+                                        <small class="form-text text-muted">Établissement automatiquement sélectionné.</small>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-center gap-3 mt-3">
+                                    <button type="submit" class="btn btn-success">Ajouter</button>
+                                    <a href="Modifier_personnel.php" class="btn btn-danger">Retour</a>
+                                </div>
+                            </form>
                         </div>
                     </div>
-                <?php endif; ?>
-            <div class="card">
-                <div class="card-body">
-        <h2 class="mb-4">Ajouter un membre du personnel</h2>
-        <?php if ($alert) echo $alert; ?>
-        <form method="POST" class="needs-validation" novalidate>
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="nom">Nom <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="nom" name="nom" required value="<?php echo isset($_POST['nom']) ? htmlspecialchars($_POST['nom']) : ''; ?>">
-                    <div class="invalid-feedback">Veuillez saisir le nom.</div>
                 </div>
-                <div class="form-group col-md-6">
-                    <label for="prenom">Prénom <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="prenom" name="prenom" required value="<?php echo isset($_POST['prenom']) ? htmlspecialchars($_POST['prenom']) : ''; ?>">
-                    <div class="invalid-feedback">Veuillez saisir le prénom.</div>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="fonction">Fonction <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="fonction" name="fonction" required value="<?php echo isset($_POST['fonction']) ? htmlspecialchars($_POST['fonction']) : ''; ?>">
-                <div class="invalid-feedback">Veuillez saisir la fonction.</div>
-            </div>
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="telephone">Téléphone</label>
-                    <input type="text" class="form-control" id="telephone" name="telephone" value="<?php echo isset($_POST['telephone']) ? htmlspecialchars($_POST['telephone']) : ''; ?>">
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="email">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="mdp_defaut">Mot de passe par défaut <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="mdp_defaut" name="mdp_defaut" required value="<?php echo isset($_POST['mdp_defaut']) ? htmlspecialchars($_POST['mdp_defaut']) : ''; ?>">
-                <div class="invalid-feedback">Veuillez saisir le mot de passe par défaut.</div>
-            </div>
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="date_embauche">Date d'embauche</label>
-                    <input type="date" class="form-control" id="date_embauche" name="date_embauche" value="<?php echo isset($_POST['date_embauche']) ? htmlspecialchars($_POST['date_embauche']) : ''; ?>">
-                </div>
-                <div class="form-group col-md-6">
-                    <label for="etablissement_id">Établissement</label>
-                    <?php
-                    // Récupère le nom de l'établissement à partir de l'id
-                    $etab_nom = '';
-                    if (!empty($etablissement_id)) {
-                        $stmtEtab = $pdo->prepare("SELECT nom FROM etab_enreg WHERE id = :id");
-                        $stmtEtab->execute([':id' => $etablissement_id]);
-                        $rowEtab = $stmtEtab->fetch();
-                        if ($rowEtab) {
-                            $etab_nom = $rowEtab['nom'];
-                        }
-                    }
-                    ?>
-                    <input type="text" class="form-control" id="etablissement_nom" name="etablissement_nom" value="<?php echo htmlspecialchars($etab_nom); ?>" readonly>
-                    <input type="hidden" name="etablissement_id" value="<?php echo htmlspecialchars($etablissement_id); ?>">
-                    <small class="form-text text-muted">Établissement automatiquement sélectionné.</small>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-success mt-3">Ajouter</button>
-            <a href="Modifier_personnel.php" class="btn btn-danger mt-3">Retour</a>
-        </form>
-                </div>
-            </div>
-
-                <!-- ... autres sections inchangées ... -->
 
             </main>
         </div>

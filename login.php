@@ -5,17 +5,18 @@ require_once 'database/db.php';
 $alert = '';
 
 // Si le formulaire est soumis
-if (isset($_POST['submit-form']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email'] ?? '');
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
     $etablissement_id = $_POST['etablissement_id'] ?? '';
 
-    if (empty($email) || empty($password) || empty($etablissement_id)) {
+    if (empty($username) || empty($password) || empty($etablissement_id)) {
         $alert = '<div class="alert alert-warning mt-2">Veuillez remplir tous les champs.</div>';
     } else {
-        // 1. Connexion via la table 'utilisateurs' (optionnel: si utilisateurs ont aussi un etablissement)
-        $stmt = $pdo->prepare("SELECT *, role AS type_user FROM utilisateurs WHERE email = :email AND actif = 1");
-        $stmt->execute([':email' => $email]);
+        // 1. Connexion via la table 'utilisateurs'
+        // Correction ici : on ne cherche QUE par email car nom_utilisateur n'existe pas
+        $stmt = $pdo->prepare("SELECT *, role AS type_user FROM utilisateurs WHERE email = :username AND actif = 1");
+        $stmt->execute([':username' => $username]);
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['mot_de_passe'])) {
@@ -35,8 +36,8 @@ if (isset($_POST['submit-form']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
             exit();
         } else {
             // 2. Sinon, tentative via la table 'personnel'
-            $stmt = $pdo->prepare("SELECT *, fonction AS type_user FROM personnel WHERE email = :email AND etablissement_id = :etablissement_id");
-            $stmt->execute([':email' => $email, ':etablissement_id' => $etablissement_id]);
+            $stmt = $pdo->prepare("SELECT *, fonction AS type_user FROM personnel WHERE email = :username AND etablissement_id = :etablissement_id");
+            $stmt->execute([':username' => $username, ':etablissement_id' => $etablissement_id]);
             $personnel = $stmt->fetch();
 
             if ($personnel && $password === $personnel['mdp_defaut']) {
@@ -65,45 +66,131 @@ try {
 
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
     <meta charset="UTF-8">
-    <title>Connexion</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/login.css">
+    <title>Connexion - Hôpital Central de la Ville</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f6f7fb;
+        }
+        .login-card {
+            max-width: 400px;
+            margin: 48px auto;
+            box-shadow: 0 2px 20px 0 rgba(44,62,80,0.09);
+            border-radius: 14px;
+            padding: 32px 28px;
+            background: #fff;
+        }
+        .login-title {
+            color: #1877f2;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+        .header-content h1 {
+            color: #1877f2;
+            margin-bottom: 0;
+            font-size: 2rem;
+            letter-spacing: 1px;
+        }
+        .header-content p {
+            color: #3d3d3d;
+            margin-bottom: 0;
+        }
+        .header-actions {
+            text-align: right;
+        }
+        .header-actions .btn {
+            margin-top: 12px;
+        }
+        nav {
+            background: #e9ecef;
+            padding: 10px 0;
+            margin-bottom: 0px;
+        }
+        nav ul {
+            list-style-type: none;
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin: 0;
+            padding: 0;
+        }
+        nav ul li a {
+            color: #1877f2;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        nav ul li a:hover {
+            color: #0d5bc4;
+        }
+        footer {
+            text-align: center;
+            margin-top: 32px;
+            color: #777;
+            font-size: 1rem;
+        }
+    </style>
 </head>
-
 <body>
-    <div class="container">
-        <h2>Connexion</h2>
-        <?php if ($alert) echo $alert; ?>
-        <form method="POST" novalidate>
-            
-            <div>
-                <label for="email">Adresse email</label>
-                <input type="email" id="email" name="email" required autofocus value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
+    <header class="container py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="header-content">
+                <h1>Hôpital Central de la Ville</h1>
+                <p>Votre santé, notre priorité</p>
             </div>
-            <div>
-                <label for="etablissement_id">Établissement</label>
-                <select id="etablissement_id" name="etablissement_id" required>
-                    <option value="">-- Sélectionnez --</option>
-                    <?php foreach ($etabs as $etab): ?>
-                        <option value="<?= htmlspecialchars($etab['id']) ?>"
-                            <?= (isset($_POST['etablissement_id']) && $_POST['etablissement_id'] == $etab['id']) ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($etab['nom']) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+            <div class="header-actions">
+                <a href="index.php" class="btn btn-outline-primary">Accueil</a>
             </div>
-            <div>
-                <label for="password">Mot de passe</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button type="submit" class="btn" name="submit-form">Se connecter</button>
-        </form>
-        <div class="text-center">
-            <a href="inscription.php" class="btn-link">S'inscrire</a>
         </div>
-    </div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html#services">Nos Services</a></li>
+            <li><a href="index.html#about">À Propos</a></li>
+            <li><a href="index.html#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section>
+            <div class="login-card shadow">
+                <h2 class="login-title mb-3">Connexion</h2>
+                <?= $alert ?>
+                <form action="" method="post" autocomplete="off">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="username" name="username" required value="<?= htmlspecialchars($_POST['username'] ?? '') ?>">
+                    </div>
+                    <div class="mb-3">
+                        <label for="etablissement_id" class="form-label">Établissement</label>
+                        <select id="etablissement_id" name="etablissement_id" class="form-select" required>
+                            <option value="">-- Sélectionnez --</option>
+                            <?php foreach ($etabs as $etab): ?>
+                                <option value="<?= htmlspecialchars($etab['id']) ?>"
+                                    <?= (isset($_POST['etablissement_id']) && $_POST['etablissement_id'] == $etab['id']) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($etab['nom']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Mot de passe</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <button type="submit" name="submit-form" class="btn btn-primary w-100">Se connecter</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer class="mt-4">
+        <p>&copy; 2023 Hôpital Central de la Ville. Tous droits réservés.</p>
+    </footer>
 </body>
 </html>

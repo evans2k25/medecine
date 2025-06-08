@@ -1,9 +1,10 @@
 <?php
+session_start();
 // --- Connexion à la base de données ---
 $host = 'localhost';
 $dbname = 'medecine';
-$user = 'root'; // À personnaliser
-$pass = '';     // À personnaliser
+$user = 'root';
+$pass = '';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass, [
@@ -14,9 +15,29 @@ try {
     die("<div class='alert alert-danger'>Erreur de connexion à la base de données : " . htmlspecialchars($e->getMessage()) . "</div>");
 }
 
+// 1. Récupérer l'établissement du personnel connecté
+$etablissement_id_perso = null;
+$etablissement_nom_perso = "";
+if (isset($_SESSION['personnel_id'])) {
+    try {
+        $sql = "SELECT e.id, e.nom FROM personnel p 
+                JOIN etab_enreg e ON p.etablissement_id = e.id 
+                WHERE p.id = :perso_id LIMIT 1";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':perso_id' => $_SESSION['personnel_id']]);
+        $row = $stmt->fetch();
+        if ($row) {
+            $etablissement_id_perso = $row['id'];
+            $etablissement_nom_perso = $row['nom'];
+        }
+    } catch (PDOException $e) {
+        // On laisse le champ établissement vide/select si erreur
+    }
+}
+
 // Fonction pour générer un numéro de dossier unique automatiquement
 function genererNumeroDossier(PDO $pdo) {
-    $anneeMois = date('Ym'); // ex : 202505
+    $anneeMois = date('Ym');
     $stmt = $pdo->prepare("SELECT numero_dossier FROM patients WHERE numero_dossier LIKE ? ORDER BY numero_dossier DESC LIMIT 1");
     $like = "D" . $anneeMois . "%";
     $stmt->execute([$like]);
@@ -51,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || empty($_POST['numeroDossier'])) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Sécuriser et récupérer les données
-    $numero_dossier   = $numero_dossier_auto; // Utilise le numéro généré, même si champ masqué côté client
+    $numero_dossier   = $numero_dossier_auto;
     $nom              = htmlspecialchars(trim($_POST['patientNom'] ?? ''));
     $prenom           = htmlspecialchars(trim($_POST['patientPrenom'] ?? ''));
     $date_naissance   = $_POST['patientDateNaissance'] ?? '';
@@ -62,7 +83,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $telephone        = htmlspecialchars(trim($_POST['patientTelephone'] ?? ''));
     $email            = htmlspecialchars(trim($_POST['patientEmail'] ?? ''));
     $groupe_sanguin   = $_POST['patientGroupeSanguin'] ?? null;
-    $etablissement_id = isset($_POST['etablissement_id']) && $_POST['etablissement_id'] !== '' ? intval($_POST['etablissement_id']) : null;
+    // Préremplissage auto de l'établissement si possible (le champ est hidden ou select readonly)
+    if ($etablissement_id_perso) {
+        $etablissement_id = $etablissement_id_perso;
+    } else {
+        $etablissement_id = isset($_POST['etablissement_id']) && $_POST['etablissement_id'] !== '' ? intval($_POST['etablissement_id']) : null;
+    }
 
     // Validation avancée
     $errors = [];
@@ -82,21 +108,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $checkStmt = $pdo->prepare("
                 SELECT id FROM patients 
-                WHERE numero_dossier = :numero_dossier 
-                  AND nom = :nom
-                  AND prenom = :prenom
+                WHERE LOWER(nom) = :nom
+                  AND LOWER(prenom) = :prenom
                   AND date_naissance = :date_naissance
                   AND etablissement_id = :etablissement_id
                 LIMIT 1
             ");
             $checkStmt->execute([
-                ':numero_dossier'   => $numero_dossier,
-                ':nom'              => $nom,
-                ':prenom'           => $prenom,
+                ':nom'              => strtolower($nom),
+                ':prenom'           => strtolower($prenom),
                 ':date_naissance'   => $date_naissance,
                 ':etablissement_id' => $etablissement_id
             ]);
-            if ($checkStmt->fetch()) {
+            if ($row = $checkStmt->fetch()) {
                 $alert = '<div class="alert alert-warning mt-3">Ce patient existe déjà dans la base de données.</div>';
             } else {
                 // Insertion
@@ -120,9 +144,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ':groupe_sanguin'   => $groupe_sanguin ?: null,
                     ':etablissement_id' => $etablissement_id
                 ]);
-                $alert = '<div class="alert alert-success mt-3">Patient enregistré avec succès !</div>';
-                // Après succès, régénère un numéro pour l'ajout suivant
-                $numero_dossier_auto = genererNumeroDossier($pdo);
+                // Récupérer l'ID du patient enregistré pour la redirection
+                $patient_id = $pdo->lastInsertId();
+                header("Location: lantern/choix_service.php?id=" . urlencode($patient_id));
+                exit();
             }
         } catch (PDOException $e) {
             $alert = '<div class="alert alert-danger mt-3">Erreur lors de l\'enregistrement : ' . htmlspecialchars($e->getMessage()) . '</div>';
@@ -250,6 +275,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="mb-3 col-md-4">
                 <label for="etablissement_id" class="form-label">Établissement <span class="text-danger">*</span></label>
+                <?php if ($etablissement_id_perso && $etablissement_nom_perso): ?>
+                    <input type="hidden" name="etablissement_id" value="<?php echo $etablissement_id_perso; ?>">
+                    <input type="text" class="form-control" value="<?php echo htmlspecialchars($etablissement_nom_perso); ?>" readonly>
+                <?php else: ?>
                 <select class="form-select custom-select" id="etablissement_id" name="etablissement_id" required>
                     <option value="">Sélectionner...</option>
                     <?php foreach ($etabs as $etab): ?>
@@ -258,6 +287,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </option>
                     <?php endforeach; ?>
                 </select>
+                <?php endif; ?>
                 <div class="invalid-feedback">Veuillez choisir un établissement.</div>
             </div>
         </div>

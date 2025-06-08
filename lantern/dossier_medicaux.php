@@ -59,19 +59,28 @@ try {
 ?>
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liste des Patients</title>
+    <title>Gestion de Dossiers Médicaux - Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
     <div class="dashboard-container">
+        <?php require_once 'inclusions/header.php';   ?>
+
         <div class="overlay"></div>
+
         <div class="dashboard-body">
+            <aside class="sidebar">
+                <?php require_once 'inclusions/sidebar.php'; ?>
+            </aside>
+
             <main class="main-content">
                 <section id="patients" class="content-section active">
                     <h2 class="mb-4">Liste de tous les Patients</h2>
@@ -79,11 +88,11 @@ try {
                     <div class="toolbar mb-3 d-flex flex-wrap gap-2">
                         <input type="text" placeholder="Rechercher un patient..." class="form-control search-input" style="max-width:250px;">
                         <a href="ajout_patient.php" class="btn btn-primary">
-                            <i class="fas fa-user-plus"></i> Ajouter Patient
+                            <i class="fas fa-user-plus"></i> Rechercher
                         </a>
                     </div>
                     <div class="table-container">
-                        <table class="table table-hover align-middle">
+                        <table class="table table-hover align-middle" id="patients-table-body">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -170,10 +179,7 @@ try {
                                             >
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <a class="btn btn-sm btn-outline-primary" title="Modifier"
-                                                href="modifier_patient.php?id=<?= $p['id'] ?>">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
+                                            
                                             <a class="btn btn-sm btn-outline-danger" title="Supprimer"
                                                 href="supprimer_patient.php?id=<?= $p['id'] ?>" onclick="return confirm('Supprimer ce patient ?');">
                                                 <i class="fas fa-trash"></i>
@@ -266,5 +272,35 @@ try {
         });
     });
     </script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('search-input');
+    const btn = document.getElementById('search-btn');
+    const tbody = document.getElementById('patients-table-body');
+    const allRows = Array.from(tbody.querySelectorAll('tr'));
+
+    function filterRows() {
+        const val = input.value.trim().toLowerCase();
+        allRows.forEach(row => {
+            const txt = row.textContent.toLowerCase();
+            row.style.display = (txt.includes(val) ? '' : 'none');
+        });
+    }
+
+    input.addEventListener('keyup', filterRows);
+    btn.addEventListener('click', filterRows);
+});
+</script>
 </body>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <?php require_once 'inclusions/modal.php'; ?>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- ... scripts JS ... -->
+</body>
+
 </html>

@@ -24,12 +24,12 @@ $current = basename($_SERVER['PHP_SELF']);
             </a>
         </li>
         <li>
-            <a href="consultations.php" class="nav-link <?= $current == 'consultations.php' ? 'active' : '' ?>">
+            <a href="consultation.php" class="nav-link <?= $current == 'consultation.php' ? 'active' : '' ?>">
                 <i class="fas fa-stethoscope"></i> Consultations
             </a>
         </li>
         <li>
-            <a href="dossier_medicaux.php" class="nav-link <?= $current == 'dossier_medicaux.php' ? 'active' : '' ?>">
+            <a href="dossier_medicaux.php" cl0ass="nav-link <?= $current == 'dossier_medicaux.php' ? 'active' : '' ?>">
                 <i class="fas fa-file-medical"></i> Dossiers Médicaux
             </a>
         </li>
